@@ -121,7 +121,7 @@
   // ── Keyboard navigation ───────────────────────────────────
   function initKeyboard() {
     document.addEventListener('keydown', (e) => {
-      const sections = ['hero', 'about', 'work', 'manifesto', 'contact'];
+      const sections = ['hero', 'about', 'skills', 'work', 'manifesto', 'contact'];
       const current = sections.findIndex((id) => {
         const el = document.getElementById(id);
         if (!el) return false;

@@ -70,6 +70,12 @@
       cardObserver.observe(el);
     });
 
+    // Skills pyramid rows cascading reveal
+    document.querySelectorAll('.reveal-row').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 0.12}s`;
+      revealObserver.observe(el);
+    });
+
     // SVG signature
     const svg = document.querySelector('.svg-sign');
     if (svg) svgObserver.observe(svg);

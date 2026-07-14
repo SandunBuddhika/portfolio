@@ -1,6 +1,5 @@
 /**
  * three-scene.js — Volumetric Colorful Particle Nebula & twining Highlight Stars background
- * Perfect color matching to the user's high-contrast, luminous cinematic cosmic screenshot.
  * Sandun Rathnayake Portfolio
  */
 
@@ -9,15 +8,11 @@
 
   // ── Global Settings for Control Panel ────────────────────
   window.__nebulaSettings = {
-    // Counts
-    nebulaCount: 8500,        // Dynamic count of nebula particles
-    starCount: 900,           // Dynamic count of twinkling stars
-
     // Nebula Clouds
     rotationSpeed: 0.015,     // Base rotation on Y-axis
-    swirlSpeed: 0.035,        // Vortex spiral speed factor
-    turbulenceSpeed: 0.25,    // Wave movement speed
-    turbulenceStrength: 2.0,  // Traveling wave ripple intensity
+    swirlSpeed: 0.03,         // Vortex spiral speed factor
+    turbulenceSpeed: 0.2,     // Breathing wave speed
+    turbulenceStrength: 1.5,  // Breathing wave amplitude
     mouseParallax: 7.5,       // Parallax shift intensity
     scrollPull: 0.04,         // Distance shift per scrolled pixel
 
@@ -46,174 +41,86 @@
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
-  camera.position.z = 75;
+  camera.position.z = 80;
 
-  // ── Colors Configuration (From Reference Screenshot) ──────
-  // Deep-space, high-contrast palette: Cyans, Pinks, Magentas, Purples, and White highlights (No Yellow/Gold)
-  const starPalette = [
-    new THREE.Color('#ffffff'), // Pure stellar white
-    new THREE.Color('#00f0ff'), // Electric cyan glow
-    new THREE.Color('#ff00aa'), // Intense hot magenta
-    new THREE.Color('#bb55ff')  // Cosmic violet highlight
+  // ── Post Processing & Fluid Setup ────────────────────────
+  let fluidEffect = null;
+  if (window.MouseFluidEffect) {
+    fluidEffect = new window.MouseFluidEffect(renderer, scene, camera);
+    if (isLightTheme) {
+      fluidEffect.setLiquidColor('#000000'); // set darker liquid tint for light mode
+    }
+  }
+
+  // ── Resize Handler ───────────────────────────────────────
+  function onResize() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    if (fluidEffect) {
+      fluidEffect.resize();
+    }
+  }
+  onResize();
+  window.addEventListener('resize', onResize);
+
+  // ── Volumetric Colorful Nebula Cloud Particles ────────────────
+  const NEBULA_COUNT = 8500;
+  const positions = new Float32Array(NEBULA_COUNT * 3);
+  const colors = new Float32Array(NEBULA_COUNT * 3);
+  const sizes = new Float32Array(NEBULA_COUNT);
+  const alphas = new Float32Array(NEBULA_COUNT);
+
+  // Define 4 color centers inside the nebula
+  const centers = [
+    { pos: new THREE.Vector3(30, 10, -10),  color: new THREE.Color('#ff00aa') }, // Hot Magenta
+    { pos: new THREE.Vector3(-35, -5, 5),   color: new THREE.Color('#00f0ff') }, // Stellar Cyan
+    { pos: new THREE.Vector3(5, -25, -20),  color: new THREE.Color('#ffaa00') }, // Glowing Gold
+    { pos: new THREE.Vector3(-10, 20, -15),  color: new THREE.Color('#8a00ff') }  // Cosmic Purple
   ];
 
-  // ── Build Geometries (Initial allocation) ────────────────
+  for (let i = 0; i < NEBULA_COUNT; i++) {
+    const centerIdx = i % centers.length;
+    const center = centers[centerIdx];
+
+    // Radial distribution with exponential decay
+    const distFactor = Math.pow(Math.random(), 2.2);
+    const radius = distFactor * 48;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+
+    const offsetX = radius * Math.sin(phi) * Math.cos(theta);
+    const offsetY = radius * Math.sin(phi) * Math.sin(theta);
+    const offsetZ = radius * Math.cos(phi);
+
+    positions[i * 3]     = center.pos.x + offsetX;
+    positions[i * 3 + 1] = center.pos.y + offsetY;
+    positions[i * 3 + 2] = center.pos.z + offsetZ;
+
+    // Colorful variations
+    const mixedColor = center.color.clone();
+    if (Math.random() > 0.6) {
+      const blendCenter = centers[(centerIdx + 1) % centers.length];
+      mixedColor.lerp(blendCenter.color, Math.random() * 0.45);
+    }
+    mixedColor.addScalar((Math.random() - 0.5) * 0.08);
+
+    colors[i * 3]     = mixedColor.r;
+    colors[i * 3 + 1] = mixedColor.g;
+    colors[i * 3 + 2] = mixedColor.b;
+
+    sizes[i]  = 0.4 + Math.random() * 1.5;
+    alphas[i] = 0.15 + Math.random() * 0.7;
+  }
+
   const nebulaGeo = new THREE.BufferGeometry();
-  const starGeo = new THREE.BufferGeometry();
+  nebulaGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  nebulaGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  nebulaGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+  nebulaGeo.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
 
-  // Rebuild function for Nebula Clouds (Continuous, winding, multi-planar stardust orbits)
-  function rebuildNebula() {
-    nebulaGeo.dispose();
-
-    const count = window.__nebulaSettings.nebulaCount;
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-    const sizes = new Float32Array(count);
-    const alphas = new Float32Array(count);
-    const phases = new Float32Array(count);
-
-    for (let i = 0; i < count; i++) {
-      // 1. Distribute particles across 4 distinct crossing/intersecting 3D filament paths
-      const orbitIndex = i % 4;
-      const pct = Math.random();
-
-      // Radius extends outwards from a core (r: 6) to the outer galaxy rim (r: 52)
-      const r = 6.0 + pct * 46.0;
-
-      // Spiral winding angle (making 3.25 full loops around the center)
-      const windings = 3.25;
-      const angle = pct * Math.PI * 2 * windings;
-
-      // Base 3D helical coordinates with vertical sinusoidal waving
-      let x = Math.sin(angle) * r;
-      let z = Math.cos(angle) * r;
-      let y = Math.sin(angle * 1.5) * (r * 0.35); // vertical weaving
-
-      // 2. Rotate each of the 4 paths to crossing, multi-planar orbits (Spline 3D style)
-      let inclination = 0.0;
-      let azimuth = 0.0;
-      if (orbitIndex === 0) {
-        inclination = 0.25; // tilted slightly around X-axis
-        azimuth = 0.6;      // rotated slightly around Y-axis
-      } else if (orbitIndex === 1) {
-        inclination = -0.35;
-        azimuth = -0.8;
-      } else if (orbitIndex === 2) {
-        inclination = 0.55;
-        azimuth = 1.25;
-      } else {
-        inclination = -0.45;
-        azimuth = -1.4;
-      }
-
-      // X-Axis Rotation (Inclination)
-      const cosI = Math.cos(inclination);
-      const sinI = Math.sin(inclination);
-      const tempY = y * cosI - z * sinI;
-      const tempZ = y * sinI + z * cosI;
-      y = tempY; z = tempZ;
-
-      // Y-Axis Rotation (Azimuth)
-      const cosA = Math.cos(azimuth);
-      const sinA = Math.sin(azimuth);
-      const tempX = x * cosA - z * sinA;
-      z = x * sinA + z * cosA;
-      x = tempX;
-
-      // 3. Volumetric puff/noise overlay to form 3D star streams
-      const noise = 4.0 * Math.pow(Math.random(), 1.6);
-      const thetaNoise = Math.random() * Math.PI * 2;
-      const phiNoise = Math.acos(2 * Math.random() - 1);
-
-      x += noise * Math.sin(phiNoise) * Math.cos(thetaNoise);
-      y += noise * Math.sin(phiNoise) * Math.sin(thetaNoise);
-      z += noise * Math.cos(phiNoise);
-
-      positions[i * 3]     = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      // 4. COLOR MAPPING (Perfect match to the user's reference screenshot)
-      // Highly-saturated blending: Core Luminous White -> Vibrant Magenta -> Royal Violet -> Electric Cyan (No gold/yellow)
-      const colorPct = r / 52.0;
-      let mixedColor;
-
-      if (colorPct < 0.20) {
-        // Glowing Stellar Core: Crisp white blending into intense hot pink
-        mixedColor = new THREE.Color('#ffffff').lerp(new THREE.Color('#ff0088'), colorPct * 5.0);
-      } else if (colorPct < 0.55) {
-        // Mid Arms: Intense Neon Pink/Magenta transitioning to deep space Purple
-        mixedColor = new THREE.Color('#ff0088').lerp(new THREE.Color('#7a00ff'), (colorPct - 0.20) * 2.85);
-      } else {
-        // Outer Gaseous Mist: Royal Purple blending into vivid Electric Turquoise/Cyan
-        mixedColor = new THREE.Color('#7a00ff').lerp(new THREE.Color('#00f0ff'), (colorPct - 0.55) * 2.22);
-      }
-
-      // Add subtle noise for realistic dust variance
-      mixedColor.addScalar((Math.random() - 0.5) * 0.04);
-
-      colors[i * 3]     = mixedColor.r;
-      colors[i * 3 + 1] = mixedColor.g;
-      colors[i * 3 + 2] = mixedColor.b;
-
-      // 5. Crisp, high-frequency particle parameters
-      sizes[i]  = 1.5 + Math.random() * 3.5;    // Crisp stardust particle sizes (1.5-5.0)
-      alphas[i] = 0.40 + Math.random() * 0.60;  // High, saturated contrast for luminous glow
-      phases[i] = Math.random() * 100.0;        // Random starting wave phase
-    }
-
-    nebulaGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    nebulaGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    nebulaGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    nebulaGeo.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
-    nebulaGeo.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
-
-    nebulaGeo.attributes.position.needsUpdate = true;
-    nebulaGeo.attributes.color.needsUpdate = true;
-    nebulaGeo.attributes.size.needsUpdate = true;
-    nebulaGeo.attributes.alpha.needsUpdate = true;
-    nebulaGeo.attributes.phase.needsUpdate = true;
-  }
-
-  // Rebuild function for Twinkling Stars
-  function rebuildStars() {
-    starGeo.dispose();
-
-    const count = window.__nebulaSettings.starCount;
-    const starPositions = new Float32Array(count * 3);
-    const starSizes = new Float32Array(count);
-    const starOffsets = new Float32Array(count);
-    const starColors = new Float32Array(count * 3);
-
-    for (let i = 0; i < count; i++) {
-      starPositions[i * 3]     = (Math.random() - 0.5) * 170;
-      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 170;
-      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 110;
-
-      starSizes[i] = 0.5 + Math.random() * 1.5;
-      starOffsets[i] = Math.random() * 100.0;
-
-      const starColor = starPalette[Math.floor(Math.random() * starPalette.length)];
-      starColors[i * 3]     = starColor.r;
-      starColors[i * 3 + 1] = starColor.g;
-      starColors[i * 3 + 2] = starColor.b;
-    }
-
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    starGeo.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
-    starGeo.setAttribute('offset', new THREE.BufferAttribute(starOffsets, 1));
-    starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
-
-    starGeo.attributes.position.needsUpdate = true;
-    starGeo.attributes.size.needsUpdate = true;
-    starGeo.attributes.offset.needsUpdate = true;
-    starGeo.attributes.color.needsUpdate = true;
-  }
-
-  rebuildNebula();
-  rebuildStars();
-
-  // ── Materials Setup ──────────────────────────────────────
   const nebulaMat = new THREE.ShaderMaterial({
     uniforms: {
       uTime:               { value: 0 },
@@ -229,7 +136,6 @@
       attribute float size;
       attribute float alpha;
       attribute vec3 color;
-      attribute float phase;
 
       uniform float uTime;
       uniform vec2 uMouse;
@@ -249,34 +155,32 @@
         vAlpha = alpha;
         vec3 pos = position;
 
-        // 1. Base Swirling Vortex Rotation
+        // Swirling vortex spiral motion
         float distFromCenter = length(pos.xy);
         float angle = uTime * (20.0 / (distFromCenter + 35.0)) * uSwirlSpeed;
         float cosA = cos(angle);
         float sinA = sin(angle);
 
+        // Rotation matrix
         float rx = pos.x * cosA - pos.y * sinA;
         float ry = pos.x * sinA + pos.y * cosA;
         pos.x = rx;
         pos.y = ry;
 
-        // 2. High-Frequency Spline-style flowing wave along curves
-        float flowWave = sin(distFromCenter * 0.15 - uTime * (uTurbulenceSpeed * 10.0) + phase) * uTurbulenceStrength;
-        pos.x += cos(angle) * flowWave;
-        pos.y += flowWave * 0.5;
-        pos.z += sin(angle) * flowWave;
+        // Undulating cosmic dust wind
+        pos.x += sin(uTime * uTurbulenceSpeed + pos.y * 0.02) * uTurbulenceStrength;
+        pos.y += cos(uTime * (uTurbulenceSpeed * 1.25) + pos.x * 0.02) * uTurbulenceStrength;
+        pos.z += sin(uTime * (uTurbulenceSpeed * 0.75) + pos.z * 0.015) * (uTurbulenceStrength * 0.66);
 
-        // 3. Mouse parallax depth shifting
+        // Mouse parallax depth shifting
         pos.x += uMouse.x * uMouseParallax;
         pos.y += uMouse.y * uMouseParallax;
 
-        // 4. Scroll pull
+        // Scroll pull
         pos.z -= uScroll * uScrollPull;
 
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-
-        // Crisp stardust size scaling factor
-        gl_PointSize = size * (250.0 / -mvPosition.z);
+        gl_PointSize = size * (230.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
       }
     `,
@@ -288,17 +192,51 @@
         float d = distance(gl_PointCoord, vec2(0.5));
         if (d > 0.5) discard;
         float strength = 1.0 - (d * 2.0);
-
-        // High-contrast stardust glow falloff (exponent of 2.2) to create glowing solid star grains
-        strength = pow(strength, 2.2);
-
-        gl_FragColor = vec4(vColor, vAlpha * strength * 0.9);
+        strength = pow(strength, 2.5);
+        gl_FragColor = vec4(vColor, vAlpha * strength * 0.85);
       }
     `,
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
+
+  const nebulaClouds = new THREE.Points(nebulaGeo, nebulaMat);
+  scene.add(nebulaClouds);
+
+  // ── Highlight Twinkling Stars (Twinkling space lights) ──────
+  const STAR_COUNT = 900;
+  const starPositions = new Float32Array(STAR_COUNT * 3);
+  const starSizes = new Float32Array(STAR_COUNT);
+  const starOffsets = new Float32Array(STAR_COUNT);
+  const starColors = new Float32Array(STAR_COUNT * 3);
+
+  const starPalette = [
+    new THREE.Color('#ffffff'), // Pure white
+    new THREE.Color('#aae6ff'), // Soft hot blue
+    new THREE.Color('#fff0b2'), // Soft hot yellow
+    new THREE.Color('#ffc1f0')  // Soft pink highlight
+  ];
+
+  for (let i = 0; i < STAR_COUNT; i++) {
+    starPositions[i * 3]     = (Math.random() - 0.5) * 170;
+    starPositions[i * 3 + 1] = (Math.random() - 0.5) * 170;
+    starPositions[i * 3 + 2] = (Math.random() - 0.5) * 110;
+
+    starSizes[i] = 0.5 + Math.random() * 1.5;
+    starOffsets[i] = Math.random() * 100.0;
+
+    const starColor = starPalette[Math.floor(Math.random() * starPalette.length)];
+    starColors[i * 3]     = starColor.r;
+    starColors[i * 3 + 1] = starColor.g;
+    starColors[i * 3 + 2] = starColor.b;
+  }
+
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+  starGeo.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+  starGeo.setAttribute('offset', new THREE.BufferAttribute(starOffsets, 1));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
 
   const starMat = new THREE.ShaderMaterial({
     uniforms: {
@@ -356,9 +294,6 @@
     blending: THREE.AdditiveBlending,
   });
 
-  const nebulaClouds = new THREE.Points(nebulaGeo, nebulaMat);
-  scene.add(nebulaClouds);
-
   const starField = new THREE.Points(starGeo, starMat);
   scene.add(starField);
 
@@ -402,17 +337,15 @@
 
     // Nebula Cloud Settings Group
     const folderClouds = gui.addFolder('Nebula Gas');
-    folderClouds.add(s, 'nebulaCount', 500, 25000, 100).name('Gas Particles').onChange(rebuildNebula);
     folderClouds.add(s, 'rotationSpeed', 0.0, 0.08, 0.001).name('Spin Speed');
     folderClouds.add(s, 'swirlSpeed', 0.0, 0.15, 0.005).name('Swirl Vortex');
     folderClouds.add(s, 'turbulenceSpeed', 0.0, 1.5, 0.05).name('Breathing Speed');
-    folderClouds.add(s, 'turbulenceStrength', 0.0, 10.0, 0.1).name('Wave Amplitude');
+    folderClouds.add(s, 'turbulenceStrength', 0.0, 5.0, 0.1).name('Wave Amplitude');
     folderClouds.add(s, 'mouseParallax', 0.0, 20.0, 0.5).name('Mouse Shift');
     folderClouds.add(s, 'scrollPull', 0.0, 0.15, 0.005).name('Scroll Pull');
 
     // Twinkling Star Settings Group
     const folderStars = gui.addFolder('Stars Field');
-    folderStars.add(s, 'starCount', 50, 4000, 50).name('Stars Count').onChange(rebuildStars);
     folderStars.add(s, 'starRotationSpeed', 0.0, 0.05, 0.001).name('Stars Spin');
     folderStars.add(s, 'twinkleSpeed', 0.1, 8.0, 0.1).name('Twinkle Speed');
     folderStars.add(s, 'driftSpeed', 0.0, 0.5, 0.01).name('Drift Speed');
@@ -451,7 +384,7 @@
     starMat.uniforms.uStarDrift.value = s.driftSpeed;
     starMat.uniforms.uStarParallax.value = s.starParallax;
 
-    // Apply slow rotations to background systems
+    // Apply slow rotations
     nebulaClouds.rotation.y = elapsed * s.rotationSpeed;
     starField.rotation.y    = elapsed * s.starRotationSpeed;
 
@@ -461,7 +394,7 @@
     camera.lookAt(scene.position);
 
     // Scroll-based camera pull
-    camera.position.z = 75 + scrollY * 0.008;
+    camera.position.z = 80 + scrollY * 0.008;
 
     // Render post-processing or fall back to standard rendering
     if (fluidEffect) {
