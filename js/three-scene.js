@@ -4,31 +4,31 @@
  */
 
 (function () {
-  'use strict';
+  "use strict";
 
   // ── Global Settings for Control Panel ────────────────────
   window.__nebulaSettings = {
     // Nebula Clouds
-    rotationSpeed: 0.015,     // Base rotation on Y-axis
-    swirlSpeed: 0.03,         // Vortex spiral speed factor
-    turbulenceSpeed: 0.2,     // Breathing wave speed
-    turbulenceStrength: 1.5,  // Breathing wave amplitude
-    mouseParallax: 7.5,       // Parallax shift intensity
-    scrollPull: 0.04,         // Distance shift per scrolled pixel
+    rotationSpeed: 0.015, // Base rotation on Y-axis
+    swirlSpeed: 0.03, // Vortex spiral speed factor
+    turbulenceSpeed: 0.2, // Breathing wave speed
+    turbulenceStrength: 1.5, // Breathing wave amplitude
+    mouseParallax: 7.5, // Parallax shift intensity
+    scrollPull: 0.04, // Distance shift per scrolled pixel
 
     // Twinkling Stars
     starRotationSpeed: 0.008, // Base star-field rotation on Y-axis
-    twinkleSpeed: 2.2,        // Speed of twinkling/blinking
-    driftSpeed: 0.08,         // Speed of minor drifting path
-    starParallax: 2.5         // Parallax shift for stars
+    twinkleSpeed: 2.2, // Speed of twinkling/blinking
+    driftSpeed: 0.08, // Speed of minor drifting path
+    starParallax: 2.5, // Parallax shift for stars
   };
 
   // ── Scene Setup ──────────────────────────────────────────
-  const canvas = document.getElementById('three-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
+  const canvas = document.getElementById("three-canvas");
+  if (!canvas || typeof THREE === "undefined") return;
 
-  const isLightTheme = document.body.getAttribute('data-theme') === 'light';
-  const initialBgColor = isLightTheme ? '#f5f4f0' : '#080808';
+  const isLightTheme = document.body.getAttribute("data-theme") === "light";
+  const initialBgColor = isLightTheme ? "#f5f4f0" : "#080808";
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -48,7 +48,7 @@
   if (window.MouseFluidEffect) {
     fluidEffect = new window.MouseFluidEffect(renderer, scene, camera);
     if (isLightTheme) {
-      fluidEffect.setLiquidColor('#000000'); // set darker liquid tint for light mode
+      fluidEffect.setLiquidColor("#000000"); // set darker liquid tint for light mode
     }
   }
 
@@ -64,7 +64,7 @@
     }
   }
   onResize();
-  window.addEventListener('resize', onResize);
+  window.addEventListener("resize", onResize);
 
   // ── Volumetric Colorful Nebula Cloud Particles ────────────────
   const NEBULA_COUNT = 8500;
@@ -75,10 +75,10 @@
 
   // Define 4 color centers inside the nebula
   const centers = [
-    { pos: new THREE.Vector3(30, 10, -10),  color: new THREE.Color('#ff00aa') }, // Hot Magenta
-    { pos: new THREE.Vector3(-35, -5, 5),   color: new THREE.Color('#00f0ff') }, // Stellar Cyan
-    { pos: new THREE.Vector3(5, -25, -20),  color: new THREE.Color('#ffaa00') }, // Glowing Gold
-    { pos: new THREE.Vector3(-10, 20, -15),  color: new THREE.Color('#8a00ff') }  // Cosmic Purple
+    { pos: new THREE.Vector3(30, 10, -10), color: new THREE.Color("#ff00aa") }, // Hot Magenta
+    { pos: new THREE.Vector3(-35, -5, 5), color: new THREE.Color("#00f0ff") }, // Stellar Cyan
+    { pos: new THREE.Vector3(5, -25, -20), color: new THREE.Color("#ffaa00") }, // Glowing Gold
+    { pos: new THREE.Vector3(-10, 20, -15), color: new THREE.Color("#8a00ff") }, // Cosmic Purple
   ];
 
   for (let i = 0; i < NEBULA_COUNT; i++) {
@@ -95,7 +95,7 @@
     const offsetY = radius * Math.sin(phi) * Math.sin(theta);
     const offsetZ = radius * Math.cos(phi);
 
-    positions[i * 3]     = center.pos.x + offsetX;
+    positions[i * 3] = center.pos.x + offsetX;
     positions[i * 3 + 1] = center.pos.y + offsetY;
     positions[i * 3 + 2] = center.pos.z + offsetZ;
 
@@ -107,30 +107,32 @@
     }
     mixedColor.addScalar((Math.random() - 0.5) * 0.08);
 
-    colors[i * 3]     = mixedColor.r;
+    colors[i * 3] = mixedColor.r;
     colors[i * 3 + 1] = mixedColor.g;
     colors[i * 3 + 2] = mixedColor.b;
 
-    sizes[i]  = 0.4 + Math.random() * 1.5;
+    sizes[i] = 0.4 + Math.random() * 1.5;
     alphas[i] = 0.15 + Math.random() * 0.7;
   }
 
   const nebulaGeo = new THREE.BufferGeometry();
-  nebulaGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  nebulaGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  nebulaGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-  nebulaGeo.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
+  nebulaGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  nebulaGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  nebulaGeo.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
+  nebulaGeo.setAttribute("alpha", new THREE.BufferAttribute(alphas, 1));
 
   const nebulaMat = new THREE.ShaderMaterial({
     uniforms: {
-      uTime:               { value: 0 },
-      uMouse:              { value: new THREE.Vector2(0, 0) },
-      uScroll:             { value: 0 },
-      uSwirlSpeed:         { value: window.__nebulaSettings.swirlSpeed },
-      uTurbulenceSpeed:    { value: window.__nebulaSettings.turbulenceSpeed },
-      uTurbulenceStrength: { value: window.__nebulaSettings.turbulenceStrength },
-      uMouseParallax:      { value: window.__nebulaSettings.mouseParallax },
-      uScrollPull:         { value: window.__nebulaSettings.scrollPull }
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      uScroll: { value: 0 },
+      uSwirlSpeed: { value: window.__nebulaSettings.swirlSpeed },
+      uTurbulenceSpeed: { value: window.__nebulaSettings.turbulenceSpeed },
+      uTurbulenceStrength: {
+        value: window.__nebulaSettings.turbulenceStrength,
+      },
+      uMouseParallax: { value: window.__nebulaSettings.mouseParallax },
+      uScrollPull: { value: window.__nebulaSettings.scrollPull },
     },
     vertexShader: `
       attribute float size;
@@ -212,39 +214,40 @@
   const starColors = new Float32Array(STAR_COUNT * 3);
 
   const starPalette = [
-    new THREE.Color('#ffffff'), // Pure white
-    new THREE.Color('#aae6ff'), // Soft hot blue
-    new THREE.Color('#fff0b2'), // Soft hot yellow
-    new THREE.Color('#ffc1f0')  // Soft pink highlight
+    new THREE.Color("#ffffff"), // Pure white
+    new THREE.Color("#aae6ff"), // Soft hot blue
+    new THREE.Color("#fff0b2"), // Soft hot yellow
+    new THREE.Color("#ffc1f0"), // Soft pink highlight
   ];
 
   for (let i = 0; i < STAR_COUNT; i++) {
-    starPositions[i * 3]     = (Math.random() - 0.5) * 170;
+    starPositions[i * 3] = (Math.random() - 0.5) * 170;
     starPositions[i * 3 + 1] = (Math.random() - 0.5) * 170;
     starPositions[i * 3 + 2] = (Math.random() - 0.5) * 110;
 
     starSizes[i] = 0.5 + Math.random() * 1.5;
     starOffsets[i] = Math.random() * 100.0;
 
-    const starColor = starPalette[Math.floor(Math.random() * starPalette.length)];
-    starColors[i * 3]     = starColor.r;
+    const starColor =
+      starPalette[Math.floor(Math.random() * starPalette.length)];
+    starColors[i * 3] = starColor.r;
     starColors[i * 3 + 1] = starColor.g;
     starColors[i * 3 + 2] = starColor.b;
   }
 
   const starGeo = new THREE.BufferGeometry();
-  starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-  starGeo.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
-  starGeo.setAttribute('offset', new THREE.BufferAttribute(starOffsets, 1));
-  starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+  starGeo.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+  starGeo.setAttribute("size", new THREE.BufferAttribute(starSizes, 1));
+  starGeo.setAttribute("offset", new THREE.BufferAttribute(starOffsets, 1));
+  starGeo.setAttribute("color", new THREE.BufferAttribute(starColors, 3));
 
   const starMat = new THREE.ShaderMaterial({
     uniforms: {
-      uTime:         { value: 0 },
-      uMouse:        { value: new THREE.Vector2(0, 0) },
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
       uTwinkleSpeed: { value: window.__nebulaSettings.twinkleSpeed },
-      uStarDrift:    { value: window.__nebulaSettings.driftSpeed },
-      uStarParallax: { value: window.__nebulaSettings.starParallax }
+      uStarDrift: { value: window.__nebulaSettings.driftSpeed },
+      uStarParallax: { value: window.__nebulaSettings.starParallax },
     },
     vertexShader: `
       attribute float size;
@@ -297,15 +300,98 @@
   const starField = new THREE.Points(starGeo, starMat);
   scene.add(starField);
 
+  // ── Highlight Warp-Speed Starfield Line Segments (Movie Speed-of-Light Effect) ──────
+  const WARP_COUNT = 600;
+  const warpVertexCount = WARP_COUNT * 2;
+  const warpPositions = new Float32Array(warpVertexCount * 3);
+  const warpColors = new Float32Array(warpVertexCount * 3);
+  const warpOffsets = new Float32Array(warpVertexCount);
+  const warpTypes = new Float32Array(warpVertexCount); // 0.0 = front, 1.0 = back
+
+  const warpGeo = new THREE.BufferGeometry();
+  warpGeo.setAttribute("position", new THREE.BufferAttribute(warpPositions, 3));
+  warpGeo.setAttribute("color", new THREE.BufferAttribute(warpColors, 3));
+  warpGeo.setAttribute("offset", new THREE.BufferAttribute(warpOffsets, 1));
+  warpGeo.setAttribute("aVertexType", new THREE.BufferAttribute(warpTypes, 1));
+
+  const warpMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      uScrollVelocity: { value: 0 },
+      uWarpAlpha: { value: 0 },
+      uStarDrift: { value: window.__nebulaSettings.driftSpeed },
+      uStarParallax: { value: window.__nebulaSettings.starParallax },
+    },
+    vertexShader: `
+      attribute float offset;
+      attribute float aVertexType;
+      attribute vec3 color;
+
+      uniform float uTime;
+      uniform vec2 uMouse;
+      uniform float uStarDrift;
+      uniform float uStarParallax;
+      uniform float uScrollVelocity;
+
+      varying float vTwinkle;
+      varying vec3 vColor;
+      varying float vVertexType;
+
+      void main() {
+        vColor = color;
+        vVertexType = aVertexType;
+        vec3 pos = position;
+
+        // Slow drifting movement (shared with point stars)
+        pos.x += sin(uTime * uStarDrift + offset) * 0.5;
+        pos.y += cos(uTime * (uStarDrift * 0.62) + offset) * 0.5;
+
+        // Mouse parallax
+        pos.x += uMouse.x * uStarParallax;
+        pos.y += uMouse.y * uStarParallax;
+
+        // SPEED-OF-LIGHT WARP STRETCH EFFECT:
+        // Stretch the back vertex along the Z axis as velocity increases!
+        pos.z -= uScrollVelocity * aVertexType * 75.0;
+
+        // Star twinkle
+        vTwinkle = 0.3 + (sin(uTime * 2.2 + offset) * 0.5 + 0.5) * 0.7;
+
+        vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      varying float vTwinkle;
+      varying vec3 vColor;
+      varying float vVertexType;
+
+      uniform float uWarpAlpha;
+
+      void main() {
+        // Smoothly fade out the line towards the back (tail) of the warp streak
+        float opacity = vTwinkle * (1.0 - vVertexType * 0.75) * uWarpAlpha;
+        gl_FragColor = vec4(vColor, opacity);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+
+  const warpField = new THREE.LineSegments(warpGeo, warpMat);
+  scene.add(warpField);
+
   // ── Mouse & Touch Trail Tracking ─────────────────────────
   const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
 
-  window.addEventListener('mousemove', (e) => {
+  window.addEventListener("mousemove", (e) => {
     mouse.targetX = (e.clientX / window.innerWidth - 0.5) * 2;
     mouse.targetY = -(e.clientY / window.innerHeight - 0.5) * 2;
   });
 
-  window.addEventListener('touchmove', (e) => {
+  window.addEventListener("touchmove", (e) => {
     if (e.touches.length > 0) {
       const clientX = e.touches[0].clientX;
       const clientY = e.touches[0].clientY;
@@ -314,10 +400,24 @@
     }
   });
 
-  // ── Scroll Tracking ─────────────────────────────────────
+  // ── Scroll Tracking & Velocity (For Movie Speed-of-Light Stretch) ──────────────────────
   let scrollY = 0;
-  window.addEventListener('scroll', () => {
-    scrollY = window.scrollY;
+  let lastScrollY = window.scrollY;
+  let scrollVelocity = 0;
+  let targetScrollVelocity = 0;
+
+  window.addEventListener("scroll", () => {
+    const currentScrollY = window.scrollY;
+    scrollY = currentScrollY;
+
+    // Calculate displacement
+    const diff = Math.abs(currentScrollY - lastScrollY);
+
+    // Accumulate velocity rather than resetting it, building inertia (momentum)
+    targetScrollVelocity += diff * 0.03;
+    targetScrollVelocity = Math.min(targetScrollVelocity, 5.0); // capped at 5.0 for dramatic stretch
+
+    lastScrollY = currentScrollY;
   });
 
   // ── Nebula Control Panel (lil-gui) ───────────────────────
@@ -325,31 +425,37 @@
     const GUI = window.lil?.GUI;
     if (!GUI) return;
 
-    const gui = new GUI({ title: 'Nebula Controls' });
+    const gui = new GUI({ title: "Nebula Controls" });
 
     // Render left to Fluid and Pincushion controls
-    gui.domElement.style.position = 'fixed';
-    gui.domElement.style.top = '80px';
-    gui.domElement.style.right = '540px';
-    gui.domElement.style.zIndex = '9999';
+    gui.domElement.style.position = "fixed";
+    gui.domElement.style.top = "80px";
+    gui.domElement.style.right = "540px";
+    gui.domElement.style.zIndex = "9999";
 
     const s = window.__nebulaSettings;
 
     // Nebula Cloud Settings Group
-    const folderClouds = gui.addFolder('Nebula Gas');
-    folderClouds.add(s, 'rotationSpeed', 0.0, 0.08, 0.001).name('Spin Speed');
-    folderClouds.add(s, 'swirlSpeed', 0.0, 0.15, 0.005).name('Swirl Vortex');
-    folderClouds.add(s, 'turbulenceSpeed', 0.0, 1.5, 0.05).name('Breathing Speed');
-    folderClouds.add(s, 'turbulenceStrength', 0.0, 5.0, 0.1).name('Wave Amplitude');
-    folderClouds.add(s, 'mouseParallax', 0.0, 20.0, 0.5).name('Mouse Shift');
-    folderClouds.add(s, 'scrollPull', 0.0, 0.15, 0.005).name('Scroll Pull');
+    const folderClouds = gui.addFolder("Nebula Gas");
+    folderClouds.add(s, "rotationSpeed", 0.0, 0.08, 0.001).name("Spin Speed");
+    folderClouds.add(s, "swirlSpeed", 0.0, 0.15, 0.005).name("Swirl Vortex");
+    folderClouds
+      .add(s, "turbulenceSpeed", 0.0, 1.5, 0.05)
+      .name("Breathing Speed");
+    folderClouds
+      .add(s, "turbulenceStrength", 0.0, 5.0, 0.1)
+      .name("Wave Amplitude");
+    folderClouds.add(s, "mouseParallax", 0.0, 20.0, 0.5).name("Mouse Shift");
+    folderClouds.add(s, "scrollPull", 0.0, 0.15, 0.005).name("Scroll Pull");
 
     // Twinkling Star Settings Group
-    const folderStars = gui.addFolder('Stars Field');
-    folderStars.add(s, 'starRotationSpeed', 0.0, 0.05, 0.001).name('Stars Spin');
-    folderStars.add(s, 'twinkleSpeed', 0.1, 8.0, 0.1).name('Twinkle Speed');
-    folderStars.add(s, 'driftSpeed', 0.0, 0.5, 0.01).name('Drift Speed');
-    folderStars.add(s, 'starParallax', 0.0, 10.0, 0.2).name('Stars Shift');
+    const folderStars = gui.addFolder("Stars Field");
+    folderStars
+      .add(s, "starRotationSpeed", 0.0, 0.05, 0.001)
+      .name("Stars Spin");
+    folderStars.add(s, "twinkleSpeed", 0.1, 8.0, 0.1).name("Twinkle Speed");
+    folderStars.add(s, "driftSpeed", 0.0, 0.5, 0.01).name("Drift Speed");
+    folderStars.add(s, "starParallax", 0.0, 10.0, 0.2).name("Stars Shift");
 
     gui.close();
   }
@@ -367,8 +473,15 @@
     mouse.x += (mouse.targetX - mouse.x) * 0.05;
     mouse.y += (mouse.targetY - mouse.y) * 0.05;
 
+    // Smooth scroll velocity lerping with momentum preservation
+    scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.06;
+    targetScrollVelocity *= 0.96; // decay rate decreased from 0.88 to 0.96 (preserves stretch longer!)
+
+    // Map velocity to warp line opacity (invisible when static, glows on scroll)
+    const warpAlpha = Math.min(scrollVelocity * 0.8, 1.0);
+
     // Update nebula cloud uniforms
-    nebulaMat.uniforms.uTime.value  = elapsed;
+    nebulaMat.uniforms.uTime.value = elapsed;
     nebulaMat.uniforms.uMouse.value.set(mouse.x, mouse.y);
     nebulaMat.uniforms.uScroll.value = scrollY;
     nebulaMat.uniforms.uSwirlSpeed.value = s.swirlSpeed;
@@ -384,16 +497,25 @@
     starMat.uniforms.uStarDrift.value = s.driftSpeed;
     starMat.uniforms.uStarParallax.value = s.starParallax;
 
+    // Update warp field uniforms
+    warpMat.uniforms.uTime.value = elapsed;
+    warpMat.uniforms.uMouse.value.set(mouse.x, mouse.y);
+    warpMat.uniforms.uScrollVelocity.value = scrollVelocity;
+    warpMat.uniforms.uWarpAlpha.value = warpAlpha;
+    warpMat.uniforms.uStarDrift.value = s.driftSpeed;
+    warpMat.uniforms.uStarParallax.value = s.starParallax;
+
     // Apply slow rotations
     nebulaClouds.rotation.y = elapsed * s.rotationSpeed;
-    starField.rotation.y    = elapsed * s.starRotationSpeed;
+    starField.rotation.y = elapsed * s.starRotationSpeed;
+    warpField.rotation.y = elapsed * s.starRotationSpeed;
 
     // Camera subtle sway from mouse
     camera.position.x += (mouse.x * 4 - camera.position.x) * 0.03;
     camera.position.y += (mouse.y * 4 - camera.position.y) * 0.03;
     camera.lookAt(scene.position);
 
-    // Scroll-based camera pull
+    // Scroll-based camera pull (removed the scrollVelocity camera push for flat, stable reading)
     camera.position.z = 80 + scrollY * 0.008;
 
     // Render post-processing or fall back to standard rendering
@@ -420,6 +542,6 @@
       if (fluidEffect) {
         fluidEffect.setLiquidColor(hex);
       }
-    }
+    },
   };
 })();
