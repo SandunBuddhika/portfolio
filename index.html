@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SANDUN — Full Stack Software Engineer</title>
+    <meta
+      name="description"
+      content="Full Stack Software Engineer crafting beautiful, performant digital experiences. © 2026 Sandun Rathnayake."
+    />
+    <meta name="author" content="Sandun Rathnayake" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-theme="dark">
+    <!-- ─── LOADING SCREEN ─────────────────────────────────── -->
+    <div id="loader" class="loader" aria-hidden="true">
+      <div class="loader__bar-wrap">
+        <div class="loader__bar" id="loader-bar"></div>
+      </div>
+      <span class="loader__label" id="loader-label">00</span>
+    </div>
+
+    <!-- ─── CURSOR ─────────────────────────────────────────── -->
+    <div id="cursor" class="cursor" aria-hidden="true">
+      <div class="cursor__dot"></div>
+      <div class="cursor__ring"></div>
+    </div>
+
+    <!-- ─── CANVAS OVERLAY (pointer events layer) ─────────── -->
+    <div id="canvas-overlay" class="canvas-overlay" aria-hidden="true">
+      <canvas id="three-canvas"></canvas>
+    </div>
+
+    <!-- ─── NAVIGATION ─────────────────────────────────────── -->
+    <header class="nav" id="nav">
+      <div class="nav__left">
+        <a
+          href="#hero"
+          class="nav__logo"
+          id="nav-logo"
+          aria-label="Sandun Rathnayake — Home"
+        >
+          <span class="nav__logo-name">sandun</span
+          ><span class="nav__logo-dot">.dev</span>
+        </a>
+      </div>
+      <nav class="nav__links" aria-label="Main navigation">
+        <button class="nav__link" data-scroll-to="work" id="nav-work">
+          Work
+        </button>
+        <button class="nav__link" data-scroll-to="contact" id="nav-contact">
+          Contact
+        </button>
+        <button
+          class="nav__link nav__theme-toggle"
+          id="theme-toggle"
+          aria-label="Toggle theme"
+        >
+          <span class="nav__theme-label">THEME[D]</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ─── BOTTOM STATUS BAR ──────────────────────────────── -->
+    <div class="status-bar" id="status-bar" aria-hidden="true">
+      <span class="status-bar__time" id="live-clock">--:--:--</span>
+      <span class="status-bar__coords" id="mouse-coords">0000 X / 0000 Y</span>
+      <span class="status-bar__tz">GMT+5:30 LK</span>
+    </div>
+
+    <!-- ─── MAIN CONTENT ───────────────────────────────────── -->
+    <main id="scroll-container">
+      <!-- ══ HERO SECTION ══════════════════════════════════════ -->
+      <section id="hero" class="hero section">
+        <div class="hero__meta">
+          <span class="hero__meta-item reveal-text">Full Stack Engineer</span>
+          <span class="hero__meta-item reveal-text">Thinking in systems.</span>
+        </div>
+
+        <div class="hero__headline">
+          <div class="hero__line reveal-line"><span>I build things</span></div>
+          <div class="hero__line reveal-line">
+            <span>that matter &amp;</span>
+          </div>
+          <div class="hero__line reveal-line">
+            <span>scale beautifully</span>
+          </div>
+        </div>
+
+        <div class="hero__bio reveal-text">
+          <p>
+            I'm <strong>Sandun Rathnayake</strong>, a Full Stack Software
+            Engineer engineering end-to-end solutions that are fast, elegant,
+            and built to last. I care deeply about the details — from system
+            architecture to pixel-perfect UI.
+          </p>
+        </div>
+
+        <div class="hero__scroll-hint reveal-text" aria-hidden="true">
+          <span class="hero__scroll-line"></span>
+          <span>scroll</span>
+        </div>
+      </section>
+
+      <!-- ══ ABOUT SECTION ══════════════════════════════════════ -->
+      <section id="about" class="about section">
+        <div class="about__signature-wrap" aria-hidden="true">
+          <!-- SVG animated signature -->
+          <svg
+            class="svg-sign"
+            viewBox="0 0 320 154"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              class="svg-sign__path"
+              d="M20 80 C40 20, 80 20, 100 80 C120 140, 160 140, 180 80 C200 20, 240 20, 260 80"
+              stroke="var(--accent)"
+              stroke-width="3"
+              fill="none"
+            />
+            <path
+              class="svg-sign__path"
+              d="M50 100 C80 60, 140 110, 200 70 C240 45, 270 75, 300 60"
+              stroke="var(--accent)"
+              stroke-width="3"
+              fill="none"
+            />
+            <path
+              class="svg-sign__path"
+              d="M260 55 L265 70"
+              stroke="var(--accent)"
+              stroke-width="4"
+              fill="none"
+            />
+          </svg>
+        </div>
+        <div class="about__content">
+          <p class="about__statement reveal-text">
+            I explore how to shape the future of web applications with craft and
+            precision — building the next generation of digital products at
+            scale.
+          </p>
+          <p class="about__sub reveal-text">
+            Currently architecting high-performance apps at
+            <a href="#" class="link" target="_blank" rel="noopener"
+              >NexaTech Solutions</a
+            >, and previously engineered systems at
+            <a href="#" class="link" target="_blank" rel="noopener">CloudBase</a
+            >,
+            <a href="#" class="link" target="_blank" rel="noopener"
+              >DevForge Labs</a
+            >, and Startify.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ WORK SECTION ═══════════════════════════════════════ -->
+      <section id="work" class="work section">
+        <h2 class="section-label reveal-text">Selected Work</h2>
+
+        <div class="work__grid">
+          <!-- 01 — NexaCommerce -->
+          <article
+            class="work__item work__item--large reveal-card"
+            data-index="1"
+          >
+            <a
+              href="#"
+              class="work__link"
+              aria-label="NexaCommerce — 2025-2026"
+            >
+              <div class="work__thumb">
+                <span class="work__tag">Full Stack</span>
+                <div class="work__thumb-bg work__thumb-bg--1"></div>
+                <div class="work__thumb-overlay">
+                  <span class="work__view">View Project ↗</span>
+                </div>
+              </div>
+              <div class="work__info">
+                <span class="work__title">NexaCommerce</span>
+                <div class="work__meta">
+                  <span class="work__year">2025–2026</span>
+                  <span class="work__type">Platform</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- 02 — PulseAnalytics -->
+          <article class="work__item reveal-card" data-index="2">
+            <a href="#" class="work__link" aria-label="PulseAnalytics — 2025">
+              <div class="work__thumb">
+                <span class="work__tag">Backend</span>
+                <div class="work__thumb-bg work__thumb-bg--2"></div>
+                <div class="work__thumb-overlay">
+                  <span class="work__view">View Project ↗</span>
+                </div>
+              </div>
+              <div class="work__info">
+                <span class="work__title">PulseAnalytics</span>
+                <div class="work__meta">
+                  <span class="work__year">2025</span>
+                  <span class="work__type">SaaS</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- 03 — Archway CMS -->
+          <article class="work__item reveal-card" data-index="3">
+            <a href="#" class="work__link" aria-label="Archway CMS — 2024">
+              <div class="work__thumb">
+                <span class="work__tag">React / Node</span>
+                <div class="work__thumb-bg work__thumb-bg--3"></div>
+                <div class="work__thumb-overlay">
+                  <span class="work__view">View Project ↗</span>
+                </div>
+              </div>
+              <div class="work__info">
+                <span class="work__title">Archway CMS</span>
+                <div class="work__meta">
+                  <span class="work__year">2024</span>
+                  <span class="work__type">Web App</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- 04 — FlowSync API -->
+          <article
+            class="work__item work__item--wide reveal-card"
+            data-index="4"
+          >
+            <a href="#" class="work__link" aria-label="FlowSync API — 2024">
+              <div class="work__thumb">
+                <span class="work__tag">API Design</span>
+                <div class="work__thumb-bg work__thumb-bg--4"></div>
+                <div class="work__thumb-overlay">
+                  <span class="work__view">View Project ↗</span>
+                </div>
+              </div>
+              <div class="work__info">
+                <span class="work__title">FlowSync API</span>
+                <div class="work__meta">
+                  <span class="work__year">2024</span>
+                  <span class="work__type">Backend</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- 05 — OrbUI Design System -->
+          <article class="work__item reveal-card" data-index="5">
+            <a
+              href="#"
+              class="work__link"
+              aria-label="OrbUI Design System — 2023"
+            >
+              <div class="work__thumb">
+                <span class="work__tag">Design Systems</span>
+                <div class="work__thumb-bg work__thumb-bg--5"></div>
+                <div class="work__thumb-overlay">
+                  <span class="work__view">View Project ↗</span>
+                </div>
+              </div>
+              <div class="work__info">
+                <span class="work__title">OrbUI Design System</span>
+                <div class="work__meta">
+                  <span class="work__year">2023</span>
+                  <span class="work__type">Open Source</span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <!-- 06 — VaultDB -->
+          <article class="work__item reveal-card" data-index="6">
+            <a href="#" class="work__link" aria-label="VaultDB — 2023">
+              <div class="work__thumb">
+                <span class="work__tag">Database</span>
+                <div class="work__thumb-bg work__thumb-bg--6"></div>
+                <div class="work__thumb-overlay">
+                  <span class="work__view">View Project ↗</span>
+                </div>
+              </div>
+              <div class="work__info">
+                <span class="work__title">VaultDB</span>
+                <div class="work__meta">
+                  <span class="work__year">2023</span>
+                  <span class="work__type">Tool</span>
+                </div>
+              </div>
+            </a>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══ MANIFESTO SECTION ══════════════════════════════════ -->
+      <section id="manifesto" class="manifesto section">
+        <div class="manifesto__sticky">
+          <div class="manifesto__lines">
+            <span class="manifesto__word reveal-manifesto">Engineer</span>
+            <span class="manifesto__word reveal-manifesto">with</span>
+            <span class="manifesto__word reveal-manifesto">purpose.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ CONTACT / FOOTER ═══════════════════════════════════ -->
+      <footer id="contact" class="contact section">
+        <div class="contact__cta">
+          <div class="contact__line reveal-line"><span>Let's</span></div>
+          <div class="contact__line reveal-line contact__line--right">
+            <span>Build</span>
+          </div>
+          <div class="contact__line reveal-line"><span>Something</span></div>
+          <div class="contact__line reveal-line contact__line--right">
+            <span>Great.</span>
+          </div>
+        </div>
+
+        <div class="contact__links">
+          <a
+            href="mailto:sandun.rathnayake@example.dev"
+            class="contact__email dotted-border"
+            id="contact-email"
+          >
+            sandun.rathnayake@example.dev
+          </a>
+          <div class="contact__socials">
+            <a
+              href="https://github.com/sandunrathnayake"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact__social dotted-border"
+              >GitHub</a
+            >
+            <a
+              href="https://linkedin.com/in/sandunrathnayake"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact__social dotted-border"
+              >LinkedIn</a
+            >
+            <a
+              href="https://twitter.com/sandundev"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact__social dotted-border"
+              >Twitter/X</a
+            >
+          </div>
+        </div>
+
+        <div class="contact__footer-bar">
+          <span>© 2026 Sandun Rathnayake</span>
+          <span>Crafted with Three.js + Vanilla JS</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- ─── SCRIPTS ────────────────────────────────────────── -->
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19"></script>
+    <script src="js/mouse-fluid.js"></script>
+    <script src="js/three-scene.js"></script>
+    <script src="js/pincushion-scroll.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
