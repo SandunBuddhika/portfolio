@@ -104,12 +104,13 @@
     switch (primary) {
       case 'help':
         printLine('AVAILABLE COMMANDS:');
-        printLine('  about     — Print a brief system background bio');
-        printLine('  skills    — Show ASCII representation of tech pyramid');
-        printLine('  projects  — List active core engineering projects');
-        printLine('  contact   — Access email, socials, and location profiles');
-        printLine('  email     — Triggers secure email packet dispatcher dialogue');
-        printLine('  clear     — Clear current logs console buffer');
+        printLine('  about       — Print a brief system background bio');
+        printLine('  experience  — Show career history & employment timeline');
+        printLine('  skills      — Show ASCII representation of tech pyramid');
+        printLine('  projects    — List active core engineering projects');
+        printLine('  contact     — Access email, socials, and location profiles');
+        printLine('  email       — Triggers secure email packet dispatcher dialogue');
+        printLine('  clear       — Clear current logs console buffer');
         break;
 
       case 'about':
@@ -118,6 +119,25 @@
         printLine('System design architect specializing in robust scalable databases,');
         printLine('event-driven message pipelines, and high-performance WebGL interfaces.');
         printLine('Dedicated to clean, predictable systems and exactly-once processing.');
+        break;
+
+      case 'experience':
+        printLine('CAREER TIMELINE:');
+        printLine('----------------');
+        printLine('► Senior Full Stack Engineer @ NexaTech Solutions (2024–Present)');
+        printLine('  Leading microservices architecture with NestJS, Kafka, Redis');
+        printLine('');
+        printLine('► Full Stack Developer @ CloudBase (2022–2024)');
+        printLine('  Built multi-tenant SaaS with Next.js, AWS, PostgreSQL');
+        printLine('');
+        printLine('► Software Engineer @ DevForge Labs (2020–2022)');
+        printLine('  Developed RESTful APIs using Jakarta EE, Hibernate, MySQL');
+        printLine('');
+        printLine('► Junior Developer @ Startify (2019–2020)');
+        printLine('  Created WordPress themes, React Native apps, CodeIgniter apps');
+        printLine('');
+        printLine('EDUCATION:');
+        printLine('  BSc (Hons) Computer Science — University of Colombo (2016–2020)');
         break;
 
       case 'skills':

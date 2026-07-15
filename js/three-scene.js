@@ -67,18 +67,27 @@
   window.addEventListener("resize", onResize);
 
   // ── Volumetric Colorful Nebula Cloud Particles ────────────────
-  const NEBULA_COUNT = 8500;
+  const NEBULA_COUNT = 18000;
   const positions = new Float32Array(NEBULA_COUNT * 3);
   const colors = new Float32Array(NEBULA_COUNT * 3);
   const sizes = new Float32Array(NEBULA_COUNT);
   const alphas = new Float32Array(NEBULA_COUNT);
 
-  // Define 4 color centers inside the nebula
+  // Define 10 color centers distributed all around the 3D space
   const centers = [
     { pos: new THREE.Vector3(30, 10, -10), color: new THREE.Color("#ff00aa") }, // Hot Magenta
     { pos: new THREE.Vector3(-35, -5, 5), color: new THREE.Color("#00f0ff") }, // Stellar Cyan
     { pos: new THREE.Vector3(5, -25, -20), color: new THREE.Color("#ffaa00") }, // Glowing Gold
     { pos: new THREE.Vector3(-10, 20, -15), color: new THREE.Color("#8a00ff") }, // Cosmic Purple
+    { pos: new THREE.Vector3(45, -30, -5), color: new THREE.Color("#ff003c") }, // Crimson Red
+    { pos: new THREE.Vector3(-45, 30, -25), color: new THREE.Color("#00ff66") }, // Emerald Green
+    { pos: new THREE.Vector3(-15, -45, 20), color: new THREE.Color("#ff5a00") }, // Vivid Orange
+    { pos: new THREE.Vector3(25, 35, -30), color: new THREE.Color("#003cff") }, // Deep Cobalt Blue
+    { pos: new THREE.Vector3(0, 5, 30), color: new THREE.Color("#4b00ff") }, // Electric Indigo
+    {
+      pos: new THREE.Vector3(-55, -15, -35),
+      color: new THREE.Color("#00ffd8"),
+    }, // Neon Teal
   ];
 
   for (let i = 0; i < NEBULA_COUNT; i++) {
@@ -87,7 +96,7 @@
 
     // Radial distribution with exponential decay
     const distFactor = Math.pow(Math.random(), 2.2);
-    const radius = distFactor * 48;
+    const radius = distFactor * 54;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
 
