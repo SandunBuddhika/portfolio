@@ -97,24 +97,32 @@
 
     let isDark = true;
 
+    function applyThemeToScene(dark) {
+      if (window.__threeScene) {
+        if (window.__threeScene.setAccentColor) {
+          window.__threeScene.setAccentColor(dark ? '#c8ff00' : '#5a00ff');
+        }
+        window.__threeScene.setBackgroundColor(dark ? '#080808' : '#f5f4f0');
+        window.__threeScene.setLiquidColor(dark ? '#fafbff' : '#000000');
+        if (window.__threeScene.setNebulaTheme) {
+          window.__threeScene.setNebulaTheme(dark);
+        }
+      }
+    }
+
     // Respect system preference on first load
     if (window.matchMedia('(prefers-color-scheme: light)').matches) {
       isDark = false;
       document.body.setAttribute('data-theme', 'light');
       if (label) label.textContent = 'THEME[L]';
+      applyThemeToScene(false);
     }
 
     btn.addEventListener('click', () => {
       isDark = !isDark;
       document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
       if (label) label.textContent = isDark ? 'THEME[D]' : 'THEME[L]';
-
-      // Update Three.js accent color and background/liquid colors
-      if (window.__threeScene) {
-        window.__threeScene.setAccentColor(isDark ? '#c8ff00' : '#5a00ff');
-        window.__threeScene.setBackgroundColor(isDark ? '#080808' : '#f5f4f0');
-        window.__threeScene.setLiquidColor(isDark ? '#fafbff' : '#000000');
-      }
+      applyThemeToScene(isDark);
     });
   }
 
